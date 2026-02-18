@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buzzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #111;
+            color: white;
+        }
+
+        #joinScreen {
+            margin-top: 30%;
+        }
+
+        #gameScreen {
+            display: none;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #buzzBtn {
+            width: 80vw;
+            height: 80vw;
+            max-width: 350px;
+            max-height: 350px;
+            border-radius: 50%;
+            font-size: 2rem;
+            border: none;
+            background-color: red;
+            color: white;
+            font-weight: bold;
+        }
+
+        #buzzBtn:disabled {
+            background-color: gray;
+        }
+    </style>
+</head>
+<body>
+
+<div id="joinScreen">
+    <h2>Enter Name</h2>
+    <input id="nameInput" placeholder="Your Name">
+    <br><br>
+    <button onclick="join()">Join</button>
+</div>
+
+<div id="gameScreen">
+    <button id="buzzBtn" onclick="buzz()">BUZZ</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const buzzBtn = document.getElementById("buzzBtn");
+
+    function join() {
+        const name = document.getElementById("nameInput").value;
+        if (!name) return;
+        socket.emit("join", name);
+
+        document.getElementById("joinScreen").style.display = "none";
+        document.getElementById("gameScreen").style.display = "flex";
+    }
+
+    function buzz() {
+        socket.emit("buzz");
+        buzzBtn.disabled = true;
+
+        if (navigator.vibrate) {
+            navigator.vibrate(200);
+        }
+    }
+
+    socket.on("buzzWinner", () => {
+        buzzBtn.disabled = true;
+    });
+
+    socket.on("resetBuzz", () => {
+        buzzBtn.disabled = false;
+    });
+</script>
+
+</body>
+</html>
